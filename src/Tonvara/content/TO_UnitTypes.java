@@ -29,8 +29,11 @@ public class TO_UnitTypes {
 
             mineWalls = mineFloor = true;
 
-            health = 230f;
-            armor = 2f;
+            health = 430f;
+            armor = 3f;
+
+            mechFrontSway = 0.55f;
+            hitSize = 9f;
 
             mineSpeed = 2.5f;
             buildSpeed = 1f;
@@ -39,17 +42,17 @@ public class TO_UnitTypes {
             mineTier = 1;
             drag = 0.05f;
 
-            weapons.add(new Weapon("light-weapon"){{
-                reload = 17f;
-                top = true;
+            weapons.add(new Weapon("artillery"){{
+                reload = 23f;
+                top = false;
                 ejectEffect = Fx.casing1;
 
-                x = 5.5f;
+                x = 7.3f;
                 y = 3f;
 
                 bullet = new BasicBulletType(2.3f, 12){{
-                    width = 7f;
-                    height = 9f;
+                    width = 8f;
+                    height = 8f;
                     lifetime = 60f;
                     shootEffect = Fx.shootSmall;
                     smokeEffect = Fx.shootSmallSmoke;

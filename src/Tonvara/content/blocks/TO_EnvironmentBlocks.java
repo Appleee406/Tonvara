@@ -6,6 +6,7 @@ import mindustry.content.StatusEffects;
 import mindustry.graphics.CacheLayer;
 import mindustry.world.Block;
 import mindustry.world.blocks.environment.Floor;
+import mindustry.world.blocks.environment.OreBlock;
 import mindustry.world.blocks.environment.StaticWall;
 import mindustry.world.blocks.environment.TreeBlock;
 import mindustry.world.meta.Attribute;
@@ -17,7 +18,10 @@ public class TO_EnvironmentBlocks {
     tree, bigTree, largeTree,
 
     /** Floor */
-    stoneFloor, floorStoneWater;
+    smoothStoneFloor, floorStoneWater,
+
+    /** Ores */
+    oreHematite;
 
     public static void load(){
         tree = new StaticWall("tree"){{
@@ -29,10 +33,8 @@ public class TO_EnvironmentBlocks {
         bigTree = new TreeBlock("big-tree");
         largeTree = new TreeBlock("large-tree"){{variants = 2;}};
 
-        stoneFloor = new Floor("smooth-stone-floor"){{
+        smoothStoneFloor = new Floor("smooth-stone-floor"){{
             itemDrop = TO_Items.stone;
-            attributes.set(Attribute.get("stone"), 0.75f);
-
             variants = 3;
         }};
 
@@ -46,6 +48,12 @@ public class TO_EnvironmentBlocks {
             cacheLayer = CacheLayer.water;
             albedo = 0.9f;
             supportsOverlay = true;
+        }};
+
+        oreHematite = new OreBlock("ore-hematite", TO_Items.hematite){{
+            oreDefault = true;
+            oreThreshold = 0.81f;
+            oreScale = 23.47619f;
         }};
     }
 }

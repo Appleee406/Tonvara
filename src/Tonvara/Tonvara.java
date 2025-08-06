@@ -13,8 +13,6 @@ public class Tonvara extends Mod{
 
     @Override
     public void loadContent(){
-        Log.info("Tonvara mod loading");
-
         TO_Sounds.load();
         TO_Attributes.load();
         TO_UnitTypes.load();
@@ -28,7 +26,5 @@ public class Tonvara extends Mod{
         TO_DistributionBlocks.load();
         TO_ProductionBlocks.load();
         TO_EnvironmentBlocks.load();
-
-        Log.info("Tonvara mod loaded");
     }
 }

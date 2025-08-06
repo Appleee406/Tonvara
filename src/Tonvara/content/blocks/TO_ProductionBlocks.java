@@ -47,7 +47,6 @@ public class TO_ProductionBlocks {
                     TO_Items.stone, 20
             );
 
-            // consumeItem(TO_Items.wood, 1);
             consumeLiquid(TO_Liquids.woodOil, 0.013f).boost();
 
             tier = 1;
