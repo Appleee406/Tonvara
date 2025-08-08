@@ -26,5 +26,9 @@ public class Tonvara extends Mod{
         TO_DistributionBlocks.load();
         TO_ProductionBlocks.load();
         TO_EnvironmentBlocks.load();
+
+        TO_Planets.load();
+        //TO_Sectors.load();
+        //TO_TechTree.load();
     }
 }
