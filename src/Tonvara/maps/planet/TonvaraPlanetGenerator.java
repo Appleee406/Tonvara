@@ -20,7 +20,6 @@ import static mindustry.Vars.*;
 public class TonvaraPlanetGenerator extends PlanetGenerator{
     public float heightScl = 0.5f, heightPow = 3f, heightMult = 1.3f, octaves = 8, persistence = 0.7f;
 
-    //TODO inline/remove
     public static float arkThresh = 0.28f, arkScl = 0.83f;
     public static int arkSeed = 7, arkOct = 2;
     public static float liqThresh = 0.64f, liqScl = 87f, redThresh = 3.1f, noArkThresh = 0.3f;
@@ -67,10 +66,7 @@ public class TonvaraPlanetGenerator extends PlanetGenerator{
 
         Block result = terrain[Mathf.clamp((int)(height * terrain.length), 0, terrain.length - 1)];
 
-        //TODO tweak this to make it more natural
-        //TODO edge distortion?
         if(ice < redThresh - noArkThresh && Ridged.noise3d(seed + arkSeed, px + 2f, py + 8f, pz + 1f, arkOct, arkScl) > arkThresh){
-            //TODO arkyic in middle
             result = Blocks.water;
         }
 

@@ -51,7 +51,7 @@ public class TO_EnvironmentBlocks {
             variants = 5;
         }};
 
-        floorGrass = new Floor("grass", 3);
+        floorGrass = new Floor("grass", 7);
 
         oreHematite = new OreBlock("ore-hematite", TO_Items.hematite){{
             oreDefault = true;

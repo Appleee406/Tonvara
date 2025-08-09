@@ -40,7 +40,6 @@ public class TO_UnitTypes {
 
             itemCapacity = 30;
             mineTier = 1;
-            drag = 0.05f;
 
             weapons.add(new Weapon("artillery"){{
                 reload = 23f;

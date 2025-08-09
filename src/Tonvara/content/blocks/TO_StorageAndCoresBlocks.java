@@ -9,7 +9,7 @@ import mindustry.world.meta.BuildVisibility;
 
 import static mindustry.type.ItemStack.*;
 
-public class TO_StorageAndCores {
+public class TO_StorageAndCoresBlocks {
     public static Block
     /** Cores */
     coreCapsule;

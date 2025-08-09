@@ -1,6 +1,6 @@
 package Tonvara.content;
 
-import Tonvara.content.blocks.TO_StorageAndCores;
+import Tonvara.content.blocks.TO_StorageAndCoresBlocks;
 import Tonvara.maps.planet.TonvaraPlanetGenerator;
 import arc.graphics.Color;
 import mindustry.content.Planets;
@@ -57,7 +57,7 @@ public class TO_Planets {
             enemyBuildSpeedMultiplier = 0.8f;
 
             prebuildBase = false;
-            defaultCore = TO_StorageAndCores.coreCapsule;
+            defaultCore = TO_StorageAndCoresBlocks.coreCapsule;
         }};
     }
 }
