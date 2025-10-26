@@ -20,6 +20,7 @@ public class TO_Planets {
             generator = new TonvaraPlanetGenerator();
             meshLoader = () -> new HexMesh(this, 6);
             alwaysUnlocked = true;
+            startSector = 0;
             iconColor = Color.forest;
 
             rotateTime = 30 * 24; // 30 minutes in one day
@@ -35,16 +36,17 @@ public class TO_Planets {
 
             defaultEnv = Env.terrestrial | Env.groundOil | Env.groundWater | Env.oxygen;
             orbitSpacing = 10f;
-            startSector = 12;
             totalRadius += 2.6f;
 
             ruleSetter = r -> {
-              r.waveTeam = Team.sharded;
-              r.fog = true;
+              r.waveTeam = Team.neoplastic;
+              r.fog = false;
+              r.placeRangeCheck = false;
+              r.showSpawns = true;
             };
             showRtsAIRule = true;
 
-            campaignRuleDefaults.fog = true;
+            campaignRuleDefaults.fog = false;
             campaignRuleDefaults.sectorInvasion = true;
             campaignRuleDefaults.randomWaveAI = true;
             campaignRuleDefaults.rtsAI = true;
@@ -52,6 +54,7 @@ public class TO_Planets {
             allowWaveSimulation = true;
             allowLaunchToNumbered = false;
             allowLaunchLoadout = true;
+            allowSelfSectorLaunch = false;
 
             enemyCoreSpawnReplace = true;
             enemyBuildSpeedMultiplier = 0.8f;

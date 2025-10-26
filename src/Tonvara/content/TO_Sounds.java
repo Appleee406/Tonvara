@@ -10,7 +10,7 @@ import mindustry.Vars;
 import java.lang.reflect.Field;
 
 public class TO_Sounds {
-    public static Sound chainsaw;
+    public static Sound chainsaw, arrow;
 
     public static void load() {
         try {

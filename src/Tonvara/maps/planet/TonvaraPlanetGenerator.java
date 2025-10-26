@@ -3,29 +3,31 @@ package Tonvara.maps.planet;
 import arc.graphics.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.struct.*;
 import arc.util.*;
 import arc.util.noise.*;
+
+import mindustry.*;
 import mindustry.ai.*;
 import mindustry.content.*;
+import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.maps.generators.*;
+import mindustry.type.*;
 import mindustry.world.*;
-import mindustry.world.blocks.environment.*;
-import mindustry.world.meta.*;
 
 import static Tonvara.content.blocks.TO_EnvironmentBlocks.*;
-
-import static mindustry.Vars.*;
 
 public class TonvaraPlanetGenerator extends PlanetGenerator{
     public float heightScl = 0.5f, heightPow = 3f, heightMult = 1.3f, octaves = 8, persistence = 0.7f;
 
     public static float arkThresh = 0.28f, arkScl = 0.83f;
     public static int arkSeed = 7, arkOct = 2;
-    public static float liqThresh = 0.64f, liqScl = 87f, redThresh = 3.1f, noArkThresh = 0.3f;
+    public static float redThresh = 3.1f, noArkThresh = 0.3f;
     public static float airThresh = 0.13f, airScl = 14;
 
-    Block[] terrain = {Blocks.water, Blocks.water, Blocks.water, Blocks.water, largeTree, Blocks.water};
+    BaseGenerator basegen = new BaseGenerator();
+    Block[] terrain = {Blocks.grass, Blocks.water, Blocks.water, Blocks.grass, Blocks.water};
 
     {
         baseSeed = 15;
@@ -91,321 +93,196 @@ public class TonvaraPlanetGenerator extends PlanetGenerator{
             tile.block = Blocks.air;
         }
 
-        //TODO only certain places should have carbon stone...
         if(Ridged.noise3d(seed + 2, position.x, position.y + 4f, position.z, 3, 6f) > 0.6){
             tile.floor = Blocks.water;
         }
     }
 
+    protected float noiseOct(float x, float y, double octaves, double falloff, double scl) {
+        Vec3 v = sector.rect.project(x, y).scl(5);
+        return Simplex.noise3d(seed, octaves, falloff, 1 / scl, v.x, v.y, v.z);
+    }
+
     @Override
-    protected void generate(){
-        float temp = rawTemp(sector.tile.v);
+    public void generate() {
+        this.tiles = tiles;
+        this.sector = sector;
+        this.rand.setSeed(sector.id);
 
-        if(temp > 0.7){
+        TileGen gen = new TileGen();
+        for (int y = 0; y < tiles.height; y++) {
+            for (int x = 0; x < tiles.width; x++) {
+                gen.reset();
+                Vec3 position = this.sector.rect.project(x / tiles.width, y / tiles.height);
 
-            pass((x, y) -> {
-                if(floor != Blocks.redIce){
-                    float noise = noise(x + 782, y, 7, 0.8f, 280f, 1f);
-                    if(noise > 0.62f){
-                        if(noise > 0.635f){
-                            floor = Blocks.slag;
-                        }else{
-                            floor = Blocks.yellowStone;
-                        }
-                        ore = Blocks.air;
-                    }
+                genTile(position, gen);
+                tiles.set(x, y, new Tile(x, y, gen.floor, gen.overlay, gen.block));
+            }
+        }
 
-                    //TODO this needs to be tweaked
-                    if(noise > 0.55f && floor == Blocks.beryllicStone){
-                        floor = Blocks.yellowStone;
-                    }
-                }
-            });
+        class Room {
+            int x, y, radius;
+            ObjectSet<Room> connected = new ObjectSet<>();
+
+            Room(int x, int y, int radius) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                connected.add(this);
+            }
+
+            void connect(Room to) {
+                if (connected.contains(to)) return;
+
+                connected.add(to);
+
+                int nscl = rand.random(20, 60);
+                int stroke = rand.random(4, 12);
+
+                brush(pathfind(x, y, to.x, to.y, tile -> (tile.solid() ? 5 : 0) + noiseOct(tile.x, tile.y, 1, 1, 1 / nscl * 60) * 60, Astar.manhattan), stroke);
+            }
         }
 
         cells(4);
-
-        //regolith walls for more dense terrain
-        pass((x, y) -> {
-            if(floor == Blocks.regolith && noise(x, y, 3, 0.4f, 13f, 1f) > 0.59f){
-                block = Blocks.regolithWall;
-            }
-        });
-
-        //TODO: yellow regolith biome tweaks
-        //TODO ice biome
-
-        float length = width/2.6f;
-        Vec2 trns = Tmp.v1.trns(rand.random(360f), length);
-        int
-                spawnX = (int)(trns.x + width/2f), spawnY = (int)(trns.y + height/2f),
-                endX = (int)(-trns.x + width/2f), endY = (int)(-trns.y + height/2f);
-        float maxd = Mathf.dst(width/2f, height/2f);
-
-        erase(spawnX, spawnY, 15);
-        brush(pathfind(spawnX, spawnY, endX, endY, tile -> (tile.solid() ? 300f : 0f) + maxd - tile.dst(width/2f, height/2f)/10f, Astar.manhattan), 9);
-        erase(endX, endY, 15);
-
-        //arkycite
-        pass((x, y) -> {
-            if(floor != Blocks.beryllicStone) return;
-
-            //TODO bad
-            if(Math.abs(noise(x, y + 500f, 5, 0.6f, 40f, 1f) - 0.5f) < 0.09f){
-                floor = Blocks.arkyicStone;
-            }
-
-            if(nearWall(x, y)) return;
-
-            float noise = noise(x + 300, y - x*1.6f + 100, 4, 0.8f, liqScl, 1f);
-
-            if(noise > liqThresh){
-                floor = Blocks.arkyciteFloor;
-            }
-        });
-
-        median(2, 0.6, Blocks.arkyciteFloor);
-
-        blend(Blocks.arkyciteFloor, Blocks.arkyicStone, 4);
-
-        //TODO may overwrite floor blocks under walls and look bad
-        blend(Blocks.slag, Blocks.yellowStonePlates, 4);
-
         distort(10f, 12f);
-        distort(5f, 7f);
 
-        //does arkycite need smoothing?
-        median(2, 0.6, Blocks.arkyciteFloor);
+        width = tiles.width;
+        height = tiles.height;
 
-        //smooth out slag to prevent random 1-tile patches
-        median(3, 0.6, Blocks.slag);
+        float constraint = 1.3f;
+        float radius = width / 2 / Mathf.sqrt3;
+        int rooms = rand.random(2, 5);
+        Seq<Room> roomseq = new Seq<>();
 
-        pass((x, y) -> {
-            //rough rhyolite
-            if(noise(x, y + 600 + x, 5, 0.86f, 60f, 1f) < 0.41f && floor == Blocks.rhyolite){
-                floor = Blocks.roughRhyolite;
-            }
+        for (int i=0; i < rooms; i++) {
+            Tmp.v1.trns(rand.random(360), rand.random(radius / constraint));
+            float rx = (float) Math.floor(width / 2 + Tmp.v1.x);
+            float ry = (float) Math.floor(height / 2 + Tmp.v1.y);
+            float maxrad = radius - Tmp.v1.len();
+            float rrad = (float) Math.floor(Math.min(rand.random(9, maxrad / 2), 30));
 
-            if(floor == Blocks.slag && Mathf.within(x, y, spawnX, spawnY, 30f + noise(x, y, 2, 0.8f, 9f, 15f))){
-                floor = Blocks.yellowStonePlates;
-            }
+            roomseq.add(new Room((int) rx, (int) ry, (int) rrad));
+        }
 
-            if((floor == Blocks.arkyciteFloor || floor == Blocks.arkyicStone) && block.isStatic()){
-                block = Blocks.arkyicWall;
-            }
+        Room spawn = null;
+        Seq<Room> enemies = new Seq<>();
+        int enemySpawns = rand.random(1, Math.max((int) Math.floor(this.sector.threat * 4), 1));
 
-            float max = 0;
-            for(Point2 p : Geometry.d8){
-                //TODO I think this is the cause of lag
-                max = Math.max(max, world.getDarkness(x + p.x, y + p.y));
-            }
-            if(max > 0){
-                block = floor.asFloor().wall;
-                if(block == Blocks.air) block = Blocks.yellowStoneWall;
-            }
+        int offset = rand.nextInt(360);
+        float length = width / 2.55f - rand.random(12, 23);
+        int angleStep = 5;
+        int waterCheckRad = 5;
+        for (int i=0; i < 360; i += angleStep) {
+            int angle = offset + i;
+            int cx = (int) Math.floor(width / 2 + Angles.trnsx(angle, length));
+            int cy = (int) Math.floor(height / 2 + Angles.trnsy(angle, length));
 
-            if(floor == Blocks.yellowStonePlates && noise(x + 78 + y, y, 3, 0.8f, 6f, 1f) > 0.44f){
-                floor = Blocks.yellowStone;
-            }
+            int waterTiles = 0;
 
-            if(floor == Blocks.redStone && noise(x + 78 - y, y, 4, 0.73f, 19f, 1f) > 0.63f){
-                floor = Blocks.denseRedStone;
-            }
-        });
+            for (int rx = -waterCheckRad; rx <= waterCheckRad; rx++) {
+                for (int ry = -waterCheckRad; ry <= waterCheckRad; ry++) {
+                    Tile tile = tiles.get(cx + rx, cy + ry);
 
-        inverseFloodFill(tiles.getn(spawnX, spawnY));
-
-        //TODO veins, blend after inverse flood fill?
-        blend(Blocks.redStoneWall, Blocks.denseRedStone, 4);
-
-        //make sure enemies have room
-        erase(endX, endY, 6);
-
-        //TODO enemies get stuck on 1x1 passages.
-
-        tiles.getn(endX, endY).setOverlay(Blocks.spawn);
-
-        //ores
-        pass((x, y) -> {
-
-            if(block != Blocks.air){
-                if(nearAir(x, y)){
-                    if(block == Blocks.carbonWall && noise(x + 78, y, 4, 0.7f, 33f, 1f) > 0.52f){
-                        block = Blocks.graphiticWall;
-                    }else if(block != Blocks.carbonWall && noise(x + 782, y, 4, 0.8f, 38f, 1f) > 0.665f){
-                        ore = Blocks.wallOreBeryllium;
+                    if (tile == null || tile.floor().liquidDrop != null) {
+                        waterTiles++;
                     }
-
                 }
-            }else if(!nearWall(x, y)){
-
-                if(noise(x + 150, y + x*2 + 100, 4, 0.8f, 55f, 1f) > 0.76f){
-                    ore = Blocks.oreTungsten;
-                }
-
-                //TODO design ore generation so it doesn't overlap
-                if(noise(x + 999, y + 600 - x, 4, 0.63f, 45f, 1f) < 0.27f && floor == Blocks.crystallineStone){
-                    ore = Blocks.oreCrystalThorium;
-                }
-
             }
 
-            if(noise(x + 999, y + 600 - x, 5, 0.8f, 45f, 1f) < 0.44f && floor == Blocks.crystallineStone){
-                floor = Blocks.crystalFloor;
+            if (waterTiles <= 4 || (i + angleStep >= 360)) {
+                spawn = new Room(cx, cy, rand.random(10, 18));
+                roomseq.add(spawn);
+
+                for (int j=0; j < enemySpawns; j++) {
+                    float enemyOffset = rand.range(60);
+
+                    Tmp.v1.set(cx - width / 2, cy - height / 2).rotate(180 + enemyOffset).add(width / 2, this.height / 2);
+                    Room espawn = new Room((int) Math.floor(Tmp.v1.x), (int) Math.floor(Tmp.v1.y), rand.random(10, 16));
+                    roomseq.add(espawn);
+                    enemies.add(espawn);
+                };
+
+                break;
             }
 
-            if(block == Blocks.air && (floor == Blocks.crystallineStone || floor == Blocks.crystalFloor) && rand.chance(0.09) && nearWall(x, y)
-                    && !near(x, y, 4, Blocks.crystalCluster) && !near(x, y, 4, Blocks.vibrantCrystalCluster)){
-                block = floor == Blocks.crystalFloor ? Blocks.vibrantCrystalCluster : Blocks.crystalCluster;
-                ore = Blocks.air;
-            }
+        }
+        for (Room room : roomseq) {
+            erase(room.x, room.y, room.radius);
+        }
 
-            if(block == Blocks.arkyicWall && rand.chance(0.23) && nearAir(x, y) && !near(x, y, 3, Blocks.crystalOrbs)){
-                block = Blocks.crystalOrbs;
-                ore = Blocks.air;
-            }
+        int connections = rand.random(Math.max(rooms - 1, 1), rooms + 3);
+        for (int i=0; i < connections; i++) {
+            roomseq.random(rand).connect(roomseq.random(rand));
+        }
 
-            //TODO test, different placement
-            //TODO this biome should have more blocks in general
-            if(block == Blocks.regolithWall && rand.chance(0.3) && nearAir(x, y) && !near(x, y, 3, Blocks.crystalBlocks)){
-                block = Blocks.crystalBlocks;
-                ore = Blocks.air;
-            }
-        });
+        for (Room room : roomseq) {
+            spawn.connect(room);
+        }
 
-        //remove props near ores, they're too annoying
+        cells(1);
+        distort(10, 6);
+
+        inverseFloodFill(tiles.getn(spawn.x, spawn.y));
+
+        Seq<Block> ores = Seq.with(oreHematite);
+        float poles = Math.abs(this.sector.tile.v.y);
+        float nmag = .5f;
+        float scl = 1;
+        float addscl = 1.3f;
+
+        if (Simplex.noise3d(seed, 2, .5f, scl, this.sector.tile.v.x + 1, this.sector.tile.v.y, this.sector.tile.v.z) * nmag + poles > .5f * addscl) {
+            ores.add(floorSmoothStone);
+        }
+
+        FloatSeq frequencies = new FloatSeq();
+        for (int i=0; i < ores.size; i++) {
+            frequencies.add(rand.random(-.1f, .01f) - i * .01f + poles * .04f);
+        }
+
         pass((x, y) -> {
-            if(ore.asFloor().wallOre || block.itemDrop != null || (block == Blocks.air && ore != Blocks.air)){
-                removeWall(x, y, 3, b -> b instanceof TallBlock);
+            if (!floor.asFloor().hasSurface()) return;
+
+            int offsetX = x - 4, offsetY = y + 23;
+            for (int i = ores.size - 1; i >= 0; i--) {
+                Block entry = ores.get(i);
+                float freq = frequencies.get(i);
+
+                if (Math.abs(.5f - noiseOct(offsetX, offsetY + i * 999, 2, .7f, (40 + i * 2))) > .22f + i * .01f &&
+                        Math.abs(.5f - noiseOct(offsetX, offsetY - i * 999, 1, 1, (30 + i * 4))) > .37f + freq) {
+                    ore = entry;
+                    break;
+                }
             }
         });
 
         trimDark();
+        median(2);
+        tech();
 
-        int minVents = rand.random(6, 9);
-        int ventCount = 0;
+        float difficulty = this.sector.threat;
 
-        //vents
-        outer:
-        for(Tile tile : tiles){
-            var floor = tile.floor();
-            if((floor == Blocks.rhyolite || floor == Blocks.roughRhyolite) && rand.chance(0.002)){
-                int radius = 2;
-                for(int x = -radius; x <= radius; x++){
-                    for(int y = -radius; y <= radius; y++){
-                        Tile other = tiles.get(x + tile.x, y + tile.y);
-                        if(other == null || (other.floor() != Blocks.rhyolite && other.floor() != Blocks.roughRhyolite) || other.block().solid){
-                            continue outer;
-                        }
-                    }
-                }
+        Schematics.placeLaunchLoadout(spawn.x, spawn.y);
 
-                ventCount ++;
-                for(var pos : SteamVent.offsets){
-                    Tile other = tiles.get(pos.x + tile.x + 1, pos.y + tile.y + 1);
-                    other.setFloor(Blocks.rhyoliteVent.asFloor());
-                }
-            }
+        for (Room espawn : enemies) {
+            tiles.getn(espawn.x, espawn.y).setOverlay(Blocks.spawn);
         }
 
-        int iterations = 0;
-        int maxIterations = 5;
+        GameState state = Vars.state;
 
-        //try to add additional vents, but only several times to prevent infinite loops in bad maps
-        while(ventCount < minVents && iterations++ < maxIterations){
-            outer:
-            for(Tile tile : tiles){
-                if(rand.chance(0.00018 * (1 + iterations)) && !Mathf.within(tile.x, tile.y, spawnX, spawnY, 5f)){
-                    //skip crystals, but only when directly on them
-                    if(tile.floor() == Blocks.crystallineStone || tile.floor() == Blocks.crystalFloor){
-                        continue;
-                    }
+        if (this.sector.hasEnemyBase()) {
+            basegen.generate(tiles, enemies.map(r -> tiles.getn(r.x, r.y)), tiles.get(spawn.x, spawn.y), state.rules.waveTeam, this.sector, difficulty);
 
-                    int radius = 1;
-                    for(int x = -radius; x <= radius; x++){
-                        for(int y = -radius; y <= radius; y++){
-                            Tile other = tiles.get(x + tile.x, y + tile.y);
-                            //skip solids / other vents / arkycite / slag
-                            if(other == null || other.block().solid || other.floor().attributes.get(Attribute.steam) != 0 || other.floor() == Blocks.slag || other.floor() == Blocks.arkyciteFloor){
-                                continue outer;
-                            }
-                        }
-                    }
-
-                    Block
-                            floor = Blocks.rhyolite,
-                            secondFloor = Blocks.rhyoliteCrater,
-                            vent = Blocks.rhyoliteVent;
-
-                    int xDir = 1;
-                    //set target material depending on what's encountered
-                    if(tile.floor() == Blocks.beryllicStone || tile.floor() == Blocks.arkyicStone){
-                        floor = secondFloor = Blocks.arkyicStone;
-                        vent = Blocks.arkyicVent;
-                    }else if(tile.floor() == Blocks.yellowStone || tile.floor() == Blocks.yellowStonePlates || tile.floor() == Blocks.regolith){
-                        floor = Blocks.yellowStone;
-                        secondFloor = Blocks.yellowStonePlates;
-                        vent = Blocks.yellowStoneVent;
-                    }else if(tile.floor() == Blocks.redStone || tile.floor() == Blocks.denseRedStone){
-                        floor = Blocks.denseRedStone;
-                        secondFloor = Blocks.redStone;
-                        vent = Blocks.redStoneVent;
-                        xDir = -1;
-                    }else if(tile.floor() == Blocks.carbonStone){
-                        floor = secondFloor = Blocks.carbonStone;
-                        vent = Blocks.carbonVent;
-                    }
-
-
-                    ventCount ++;
-                    for(var pos : SteamVent.offsets){
-                        Tile other = tiles.get(pos.x + tile.x + 1, pos.y + tile.y + 1);
-                        other.setFloor(vent.asFloor());
-                    }
-
-                    //"circle" for blending
-                    //TODO should it replace akrycite? slag?
-                    int crad = rand.random(6, 14), crad2 = crad * crad;
-                    for(int cx = -crad; cx <= crad; cx++){
-                        for(int cy = -crad; cy <= crad; cy++){
-                            int rx = cx + tile.x, ry = cy + tile.y;
-                            //skew circle Y
-                            float rcy = cy + cx*0.9f;
-                            if(cx*cx + rcy*rcy <= crad2 - noise(rx, ry + rx * 2f * xDir, 2, 0.7f, 8f, crad2 * 1.1f)){
-                                Tile dest = tiles.get(rx, ry);
-                                if(dest != null && dest.floor().attributes.get(Attribute.steam) == 0 && dest.floor() != Blocks.roughRhyolite && dest.floor() != Blocks.arkyciteFloor && dest.floor() != Blocks.slag){
-
-                                    dest.setFloor(rand.chance(0.08) ? secondFloor.asFloor() : floor.asFloor());
-
-                                    if(dest.block().isStatic()){
-                                        dest.setBlock(floor.asFloor().wall);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
+            state.rules.attackMode = this.sector.info.attack = true;
+        } else {
+            state.rules.winWave = this.sector.info.winWave = (int) (10 + 5 * Math.max(difficulty * 10, 1));
         }
 
-        for(Tile tile : tiles){
-            if(tile.overlay().needsSurface && !tile.floor().hasSurface()){
-                tile.setOverlay(Blocks.air);
-            }
-        }
+        float waveTimeDec = .4f;
 
-        decoration(0.017f);
+        state.rules.waveSpacing = Mathf.lerp(60 * 65 * 2, 60 * 60 * 1, (float) Math.floor(Math.max(difficulty - waveTimeDec, 0) / .8f));
+        state.rules.waves = this.sector.info.waves = true;
+        state.rules.enemyCoreBuildRadius = 480;
 
-        //it is very hot
-        state.rules.env = sector.planet.defaultEnv;
-        state.rules.placeRangeCheck = true;
-
-        //TODO remove slag and arkycite around core.
-        Schematics.placeLaunchLoadout(spawnX, spawnY);
-
-        //all sectors are wave sectors
-        state.rules.waves = false;
-        state.rules.showSpawns = true;
+        state.rules.spawns = Waves.generate(difficulty, new Rand(), state.rules.attackMode);
     }
 }

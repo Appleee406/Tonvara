@@ -19,7 +19,7 @@ public class Tonvara extends Mod{
         TO_Liquids.load();
         TO_Items.load();
 
-        /* Blocks */
+        // Blocks
         TO_StorageAndCoresBlocks.load();
         TO_ConduitBlocks.load();
         TO_CrafterBlocks.load();
@@ -30,6 +30,6 @@ public class Tonvara extends Mod{
 
         TO_Planets.load();
         //TO_Sectors.load();
-        //TO_TechTree.load();
+        TonvaraTechTree.load();
     }
 }

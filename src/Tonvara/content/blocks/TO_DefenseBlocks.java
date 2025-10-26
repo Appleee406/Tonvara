@@ -1,21 +1,30 @@
 package Tonvara.content.blocks;
 
 import Tonvara.content.TO_Items;
+import Tonvara.content.TO_Sounds;
+import mindustry.content.Fx;
+import mindustry.entities.bullet.*;
+import mindustry.graphics.Pal;
 import mindustry.type.Category;
 import mindustry.type.ItemStack;
 import mindustry.world.Block;
 import mindustry.world.blocks.defense.Wall;
+import mindustry.world.blocks.defense.turrets.*;
 
 import static mindustry.type.ItemStack.with;
 
 public class TO_DefenseBlocks {
-    static Block
-    /** Walls */
-    woodWall, stoneWall, stoneWallLarge, brickWall, brickWallLarge;
+    public static Block
+    // Walls
+    woodWall, stoneWall, stoneWallLarge, brickWall, brickWallLarge,
+
+    // Turrets
+    crossbow;
 
     public static void load(){
         short wallHealthMultiplier = 4;
 
+        // Walls begin
         woodWall = new Wall("wood-wall"){{
             requirements(Category.defense, with(TO_Items.wood, 6));
             health = 45 * wallHealthMultiplier;
@@ -42,5 +51,38 @@ public class TO_DefenseBlocks {
             health = brickWall.health * wallHealthMultiplier;
             size = 2;
         }};
+
+        // Walls end
+
+
+        // Turrets begin
+        crossbow = new ItemTurret("crossbow"){{
+            requirements(Category.turret, with(TO_Items.stone, 20, TO_Items.wood, 30));
+            ammo(
+                    TO_Items.arrow, new BasicBulletType(2.5f, 7f){{
+                        width = 5f;
+                        height = 14f;
+                        lifetime = 85f;
+                        ammoMultiplier = 1;
+
+                        hitEffect = despawnEffect = Fx.hitBulletColor;
+                        hitColor = backColor = trailColor = Pal.copperAmmoBack;
+                        frontColor = Pal.siliconAmmoFront;
+                    }}
+            );
+
+            size = 2;
+            recoil = 1f;
+            targetAir = false;
+            reload = 70f;
+            range = 240f;
+            inaccuracy = 1f;
+            shootCone = 10f;
+            scaledHealth = 110;
+            shootSound = TO_Sounds.arrow;
+            limitRange(0f);
+        }};
+
+        // Turrets end
     }
 }
