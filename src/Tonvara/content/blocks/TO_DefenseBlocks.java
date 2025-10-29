@@ -54,12 +54,11 @@ public class TO_DefenseBlocks {
 
         // Walls end
 
-
         // Turrets begin
         crossbow = new ItemTurret("crossbow"){{
             requirements(Category.turret, with(TO_Items.stone, 20, TO_Items.wood, 30));
             ammo(
-                    TO_Items.arrow, new BasicBulletType(2.5f, 7f){{
+                    TO_Items.arrow, new BasicBulletType(2.7f, 10f){{
                         width = 5f;
                         height = 14f;
                         lifetime = 85f;
@@ -68,6 +67,15 @@ public class TO_DefenseBlocks {
                         hitEffect = despawnEffect = Fx.hitBulletColor;
                         hitColor = backColor = trailColor = Pal.copperAmmoBack;
                         frontColor = Pal.siliconAmmoFront;
+                    }},
+                    TO_Items.stone, new BasicBulletType(2.4f, 7f){{
+                        width = 8f;
+                        height = 8;
+                        lifetime = 85f;
+                        ammoMultiplier = 1;
+
+                        hitEffect = despawnEffect = Fx.hitBulletColor;
+                        hitColor = backColor = trailColor = frontColor = Pal.siliconAmmoFront;
                     }}
             );
 

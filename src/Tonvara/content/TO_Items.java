@@ -2,17 +2,16 @@ package Tonvara.content;
 
 import arc.graphics.*;
 import arc.struct.*;
+import mindustry.content.Items;
 import mindustry.type.*;
 
 public class TO_Items {
     public static Item
     // resources
-    wood, stone, stoneBrick, hematite,
+    wood, stone, stoneBrick, hematite, iron,
 
     // ammo
     arrow;
-
-    public static final Seq<Item> tonvaraItems = new Seq<>();
 
     public static void load(){
 
@@ -24,6 +23,7 @@ public class TO_Items {
         stone = new Item("stone", Color.darkGray);
         stoneBrick = new Item("stone-brick", Color.gray);
         hematite = new Item("hematite", Color.valueOf("ac8675"));
+        iron = new Item("iron", Color.gray);
 
         // resources end
 
@@ -31,7 +31,5 @@ public class TO_Items {
         arrow = new Item("arrow", Color.valueOf("8f4905"));
 
         // ammo end
-
-        tonvaraItems.addAll(wood, stone, stoneBrick, hematite, arrow);
     }
 }

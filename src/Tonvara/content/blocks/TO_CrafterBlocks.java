@@ -4,7 +4,9 @@ import Tonvara.content.TO_Items;
 import Tonvara.content.TO_Liquids;
 
 import arc.graphics.Color;
+import arc.struct.Seq;
 import mindustry.content.Fx;
+import mindustry.content.Items;
 import mindustry.gen.Sounds;
 import mindustry.type.Category;
 import mindustry.type.ItemStack;
@@ -12,11 +14,14 @@ import mindustry.type.LiquidStack;
 import mindustry.world.Block;
 import mindustry.world.blocks.production.GenericCrafter;
 import mindustry.world.draw.*;
+import multicraft.IOEntry;
+import multicraft.MultiCrafter;
+import multicraft.Recipe;
 
 import static mindustry.type.ItemStack.with;
 
 public class TO_CrafterBlocks {
-    public static Block woodOilExtractor, brickFactory;
+    public static Block woodOilExtractor, smelter, ammoAssemblerT1;
 
     public static void load(){
         woodOilExtractor = new GenericCrafter("wood-oil-extractor"){{
@@ -44,12 +49,11 @@ public class TO_CrafterBlocks {
                 scaledHealth = 50;
                 size = 2;
 
-                rotateDraw = false;
                 hasLiquids = hasItems = true;
                 outputsLiquid = true;
             }};
 
-        brickFactory = new GenericCrafter("brick-factory"){{
+        smelter = new MultiCrafter("smelter"){{
             requirements(Category.crafting, with(
                     TO_Items.wood, 30,
                     TO_Items.stone, 50
@@ -59,23 +63,82 @@ public class TO_CrafterBlocks {
                     TO_Items.stone, 300
             );
 
-            consumeItems(with(TO_Items.stone, 3, TO_Items.wood, 1));
-            outputItem = new ItemStack(TO_Items.stoneBrick, 1);
-
-            craftEffect = Fx.coalSmeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawFlame(Color.valueOf("ffef99")));
+            itemCapacity = 10;
+            scaledHealth = 65f;
+            size = 2;
 
             ambientSound = Sounds.smelter;
             ambientSoundVolume = 0.07f;
 
-            itemCapacity = 10;
-            craftTime = 65f;
-            scaledHealth = 65f;
+            craftEffect = Fx.coalSmeltsmoke;
+            drawer = new DrawMulti(new DrawDefault(), new DrawFlame(Color.valueOf("ffef99")));
+
+            resolvedRecipes = Seq.with(
+                    new Recipe(
+                            new IOEntry(
+                                    Seq.with(ItemStack.with(TO_Items.stone, 3, TO_Items.wood, 4)),
+                                    Seq.with()
+                            ),
+                            new IOEntry(
+                                    Seq.with(ItemStack.with(TO_Items.stoneBrick, 1)),
+                                    Seq.with()
+                            ), 60f
+                    ),
+                    new Recipe(
+                            new IOEntry(
+                                    Seq.with(ItemStack.with(TO_Items.stone, 3, Items.coal, 1)),
+                                    Seq.with()
+                            ),
+                            new IOEntry(
+                                    Seq.with(ItemStack.with(TO_Items.stoneBrick, 1)),
+                                    Seq.with()
+                            ), 0.75f * 60f
+                    ),
+                    new Recipe(
+                            new IOEntry(
+                                    Seq.with(ItemStack.with(TO_Items.hematite, 3, Items.coal, 2)),
+                                    Seq.with()
+                            ),
+                            new IOEntry(
+                                    Seq.with(ItemStack.with(TO_Items.iron, 1)),
+                                    Seq.with()
+                            ), 1.5f * 60f
+                    )
+            );
+        }};
+
+        ammoAssemblerT1 = new MultiCrafter("ammo-assembler-t1"){{
+            requirements(Category.crafting, with(
+                    TO_Items.wood, 20,
+                    TO_Items.stone, 40,
+                    TO_Items.stoneBrick, 20
+            ));
+            researchCost = with(
+                    TO_Items.wood, 100,
+                    TO_Items.stone, 210,
+                    TO_Items.stoneBrick, 50
+            );
+
+            itemCapacity = 15;
+            scaledHealth = 55f;
             size = 2;
 
-            rotateDraw = false;
-            hasLiquids = false;
-            hasItems = true;
+            ambientSound = Sounds.machine;
+            ambientSoundVolume = 0.1f;
+            craftEffect = Fx.formsmoke;
+
+            resolvedRecipes = Seq.with(
+                    new Recipe(
+                            new IOEntry(
+                                    Seq.with(ItemStack.with(TO_Items.wood, 1, TO_Items.stone, 1)),
+                                    Seq.with()
+                            ),
+                            new IOEntry(
+                                    Seq.with(ItemStack.with(TO_Items.arrow, 2)),
+                                    Seq.with()
+                            ), 0.8f * 60f
+                    )
+            );
         }};
     }
 }
