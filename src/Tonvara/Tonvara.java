@@ -20,6 +20,7 @@ public class Tonvara extends Mod{
         TO_Items.load();
 
         // Blocks
+        TO_PowerBlocks.load();
         TO_StorageAndCoresBlocks.load();
         TO_ConduitBlocks.load();
         TO_CrafterBlocks.load();

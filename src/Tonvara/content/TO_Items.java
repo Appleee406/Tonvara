@@ -1,14 +1,12 @@
 package Tonvara.content;
 
 import arc.graphics.*;
-import arc.struct.*;
-import mindustry.content.Items;
 import mindustry.type.*;
 
 public class TO_Items {
     public static Item
     // resources
-    wood, stone, stoneBrick, hematite, iron,
+    wood, stone, stoneBrick, hematite, iron, silver,
 
     // ammo
     arrow;
@@ -24,6 +22,7 @@ public class TO_Items {
         stoneBrick = new Item("stone-brick", Color.gray);
         hematite = new Item("hematite", Color.valueOf("ac8675"));
         iron = new Item("iron", Color.gray);
+        silver = new Item("silver", Color.valueOf("c9c0bb"));
 
         // resources end
 

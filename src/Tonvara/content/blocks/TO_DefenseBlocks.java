@@ -68,10 +68,10 @@ public class TO_DefenseBlocks {
                         hitColor = backColor = trailColor = Pal.copperAmmoBack;
                         frontColor = Pal.siliconAmmoFront;
                     }},
-                    TO_Items.stone, new BasicBulletType(2.4f, 7f){{
+                    TO_Items.stone, new BasicBulletType(2.4f, 5f){{
                         width = 8f;
                         height = 8;
-                        lifetime = 85f;
+                        lifetime = 80f;
                         ammoMultiplier = 1;
 
                         hitEffect = despawnEffect = Fx.hitBulletColor;

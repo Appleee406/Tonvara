@@ -51,7 +51,6 @@ public class TO_Planets {
             campaignRuleDefaults.randomWaveAI = true;
             campaignRuleDefaults.rtsAI = true;
 
-            allowWaveSimulation = true;
             allowLaunchToNumbered = false;
             allowLaunchLoadout = true;
             allowSelfSectorLaunch = false;

@@ -36,6 +36,7 @@ public class TO_CrafterBlocks {
 
                 drawer = new DrawMulti(
                         new DrawLiquidTile(TO_Liquids.woodOil),
+                        new DrawRegion("-bottom"),
                         new DrawRegion("-top"),
                         new DrawDefault()
                 );
@@ -67,7 +68,7 @@ public class TO_CrafterBlocks {
             scaledHealth = 65f;
             size = 2;
 
-            ambientSound = Sounds.smelter;
+            ambientSound = Sounds.loopSmelter;
             ambientSoundVolume = 0.07f;
 
             craftEffect = Fx.coalSmeltsmoke;
@@ -110,8 +111,8 @@ public class TO_CrafterBlocks {
         ammoAssemblerT1 = new MultiCrafter("ammo-assembler-t1"){{
             requirements(Category.crafting, with(
                     TO_Items.wood, 20,
-                    TO_Items.stone, 40,
-                    TO_Items.stoneBrick, 20
+                    TO_Items.stone, 30,
+                    TO_Items.stoneBrick, 10
             ));
             researchCost = with(
                     TO_Items.wood, 100,
@@ -123,15 +124,16 @@ public class TO_CrafterBlocks {
             scaledHealth = 55f;
             size = 2;
 
-            ambientSound = Sounds.machine;
+            ambientSound = Sounds.loopMachine;
             ambientSoundVolume = 0.1f;
             craftEffect = Fx.formsmoke;
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawDefault());
 
             resolvedRecipes = Seq.with(
                     new Recipe(
                             new IOEntry(
                                     Seq.with(ItemStack.with(TO_Items.wood, 1, TO_Items.stone, 1)),
-                                    Seq.with()
+                                    Seq.with(), 0.50f
                             ),
                             new IOEntry(
                                     Seq.with(ItemStack.with(TO_Items.arrow, 2)),
