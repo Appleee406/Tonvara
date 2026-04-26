@@ -1,14 +1,13 @@
 package multicraft;
 
-import arc.graphics.g2d.Draw;
-import arc.graphics.g2d.TextureRegion;
-import arc.struct.Seq;
-import arc.util.Eachable;
-import mindustry.entities.units.BuildPlan;
-import mindustry.gen.Building;
-import mindustry.world.Block;
-import mindustry.world.draw.DrawBlock;
-import multicraft.MultiCrafter.MultiCrafterBuild;
+import arc.graphics.g2d.*;
+import arc.struct.*;
+import arc.util.*;
+import mindustry.entities.units.*;
+import mindustry.gen.*;
+import mindustry.world.*;
+import mindustry.world.draw.*;
+import multicraft.MultiCrafter.*;
 
 public class DrawRecipe extends DrawBlock {
     public int defaultDrawer = 0;
@@ -28,7 +27,7 @@ public class DrawRecipe extends DrawBlock {
     public void draw(Building build) {
         if (build instanceof MultiCrafterBuild) {
             MultiCrafterBuild crafter = (MultiCrafterBuild) build;
-            int i = crafter.curRecipeIndex;
+            int i = crafter.recipeId;
             if (0 <= i && i < drawers.length)
                 drawers[i].draw(build);
         } else {
@@ -40,7 +39,7 @@ public class DrawRecipe extends DrawBlock {
     public void drawLight(Building build) {
         if (build instanceof MultiCrafterBuild) {
             MultiCrafterBuild crafter = (MultiCrafterBuild) build;
-            int i = crafter.curRecipeIndex;
+            int i = crafter.recipeId;
             if (0 < i && i < drawers.length)
                 drawers[i].drawLight(build);
         }

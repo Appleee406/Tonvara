@@ -9,21 +9,16 @@ import mindustry.core.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 
-public class FluidImage extends Stack {
-    /**
-     * No amount text
-     * @param region the fluid icon
-     */
-    public FluidImage(TextureRegion region) {
-
+public class PayloadImage extends Stack {
+    
+    public PayloadImage(TextureRegion region) {
         add(new Table(o -> {
             o.left();
             o.add(new Image(region)).size(32f);
         }));
     }
 
-    public FluidImage(TextureRegion region, float amount) {
-
+    public PayloadImage(TextureRegion region, float amount) {
         add(new Table(o -> {
             o.left();
             o.add(new Image(region)).size(32f);
@@ -41,7 +36,7 @@ public class FluidImage extends Stack {
         }
     }
 
-    public FluidImage(LiquidStack stack) {
-        this(stack.liquid.uiIcon, stack.amount);
+    public PayloadImage(PayloadStack stack) {
+        this(stack.item.uiIcon, stack.amount);
     }
 }

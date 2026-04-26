@@ -15,7 +15,7 @@ public class TO_Items {
 
         // resources begin
         wood = new Item("wood", Color.valueOf("8f4905")){{
-            flammability = 1.0f;
+            flammability = 0.7f;
         }};
 
         stone = new Item("stone", Color.darkGray);
@@ -23,12 +23,12 @@ public class TO_Items {
         hematite = new Item("hematite", Color.valueOf("ac8675"));
         iron = new Item("iron", Color.gray);
         silver = new Item("silver", Color.valueOf("c9c0bb"));
-
         // resources end
 
         // ammo begin
-        arrow = new Item("arrow", Color.valueOf("8f4905"));
-
+        arrow = new Item("arrow", Color.valueOf("8f4905")){{
+            flammability = 0.4f;
+        }};
         // ammo end
     }
 }

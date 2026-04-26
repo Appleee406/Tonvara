@@ -3,13 +3,14 @@ package Tonvara.content.blocks;
 import Tonvara.content.TO_Items;
 import Tonvara.content.TO_Liquids;
 
+import Tonvara.content.TO_Sounds;
 import arc.graphics.Color;
 import arc.struct.Seq;
 import mindustry.content.Fx;
 import mindustry.content.Items;
+import mindustry.content.Liquids;
 import mindustry.gen.Sounds;
 import mindustry.type.Category;
-import mindustry.type.ItemStack;
 import mindustry.type.LiquidStack;
 import mindustry.world.Block;
 import mindustry.world.blocks.production.GenericCrafter;
@@ -21,7 +22,7 @@ import multicraft.Recipe;
 import static mindustry.type.ItemStack.with;
 
 public class TO_CrafterBlocks {
-    public static Block woodOilExtractor, smelter, ammoAssemblerT1;
+    public static Block woodOilExtractor, smelter, ammoAssemblerT1, boiler;
 
     public static void load(){
         woodOilExtractor = new GenericCrafter("wood-oil-extractor"){{
@@ -75,36 +76,51 @@ public class TO_CrafterBlocks {
             drawer = new DrawMulti(new DrawDefault(), new DrawFlame(Color.valueOf("ffef99")));
 
             resolvedRecipes = Seq.with(
-                    new Recipe(
-                            new IOEntry(
-                                    Seq.with(ItemStack.with(TO_Items.stone, 3, TO_Items.wood, 4)),
-                                    Seq.with()
-                            ),
-                            new IOEntry(
-                                    Seq.with(ItemStack.with(TO_Items.stoneBrick, 1)),
-                                    Seq.with()
-                            ), 60f
-                    ),
-                    new Recipe(
-                            new IOEntry(
-                                    Seq.with(ItemStack.with(TO_Items.stone, 3, Items.coal, 1)),
-                                    Seq.with()
-                            ),
-                            new IOEntry(
-                                    Seq.with(ItemStack.with(TO_Items.stoneBrick, 1)),
-                                    Seq.with()
-                            ), 0.75f * 60f
-                    ),
-                    new Recipe(
-                            new IOEntry(
-                                    Seq.with(ItemStack.with(TO_Items.hematite, 3, Items.coal, 2)),
-                                    Seq.with()
-                            ),
-                            new IOEntry(
-                                    Seq.with(ItemStack.with(TO_Items.iron, 1)),
-                                    Seq.with()
-                            ), 1.5f * 60f
-                    )
+                    new Recipe() {{
+                            input = new IOEntry(){{
+                                items = with(
+                                        TO_Items.stone, 3,
+                                        TO_Items.wood, 4
+                                );
+
+                            }};
+                            output = new IOEntry(){{
+                                items = with(
+                                        TO_Items.stoneBrick, 1
+                                );
+                            }};
+                            craftTime = 1.3f * 60f;
+                    }},
+
+                    new Recipe() {{
+                        input = new IOEntry(){{
+                            items = with(
+                                    TO_Items.stone, 3,
+                                    Items.coal, 1
+                            );
+                        }};
+                        output = new IOEntry() {{
+                            items = with(
+                                    TO_Items.stoneBrick, 1
+                            );
+                        }};
+                        craftTime = 0.75f * 60f;
+                    }},
+
+                    new Recipe(){{
+                            input = new IOEntry(){{
+                                items = with(
+                                        TO_Items.hematite, 3,
+                                        Items.coal, 2
+                                );
+                            }};
+                            output = new IOEntry() {{
+                                items = with(
+                                        TO_Items.iron, 1
+                                );
+                            }};
+                            craftTime = 1.5f * 60f;
+                    }}
             );
         }};
 
@@ -130,16 +146,54 @@ public class TO_CrafterBlocks {
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawDefault());
 
             resolvedRecipes = Seq.with(
-                    new Recipe(
-                            new IOEntry(
-                                    Seq.with(ItemStack.with(TO_Items.wood, 1, TO_Items.stone, 1)),
-                                    Seq.with(), 0.50f
-                            ),
-                            new IOEntry(
-                                    Seq.with(ItemStack.with(TO_Items.arrow, 2)),
-                                    Seq.with()
-                            ), 0.8f * 60f
-                    )
+                    new Recipe(){{
+                            input = new IOEntry(){{
+                                items = with(
+                                        TO_Items.wood, 1,
+                                        TO_Items.stone, 1
+                                );
+                            }};
+                            output = new IOEntry() {{
+                                items = with(
+                                        TO_Items.arrow, 2
+                                );
+                            }};
+                            craftTime = 1.5f * 60f;
+                    }}
+            );
+        }};
+
+        boiler = new MultiCrafter("boiler"){{
+            requirements(Category.crafting, with(
+                    TO_Items.stoneBrick, 20,
+                    TO_Items.iron, 10,
+                    TO_Items.silver, 10
+            ));
+            researchCost = with(
+                    TO_Items.stoneBrick, 200,
+                    TO_Items.iron, 70,
+                    TO_Items.silver, 70
+            );
+
+            liquidCapacity = 40f;
+            maxEfficiency = 1f;
+            overheatScale = 1f;
+            scaledHealth = 30f;
+            size = 2;
+
+            ambientSound = TO_Sounds.boiling;
+            ambientSoundVolume = 0.07f;
+
+            resolvedRecipes = Seq.with(
+                    new Recipe() {{
+                            input = new IOEntry() {{
+                                fluids = LiquidStack.with(Liquids.water, 10 / 60f);
+                            }};
+                            output = new IOEntry() {{
+                                fluids = LiquidStack.with(TO_Liquids.steam, 10 / 60f);
+                            }};
+                            craftTime = 1.5f * 60f;
+                    }}
             );
         }};
     }

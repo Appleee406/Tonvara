@@ -34,7 +34,7 @@ public class TO_ProductionBlocks {
             attribute = Attribute.get("wood");
             fogRadius = 2;
             ambientSound = TO_Sounds.chainsaw;
-            ambientSoundVolume = 0.03f;
+            ambientSoundVolume = 0.007f;
         }};
 
         basicDrill = new Drill("basic-drill"){{

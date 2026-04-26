@@ -87,7 +87,9 @@ public class TO_DefenseBlocks {
             inaccuracy = 1f;
             shootCone = 10f;
             scaledHealth = 110;
+
             shootSound = TO_Sounds.arrow;
+            shootSoundVolume = 0.07f;
             limitRange(0f);
         }};
 

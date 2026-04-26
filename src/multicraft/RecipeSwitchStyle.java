@@ -1,35 +1,29 @@
 package multicraft;
 
-import arc.scene.ui.Image;
-import arc.scene.ui.ImageButton;
-import arc.scene.ui.TextButton;
-import arc.scene.ui.layout.Table;
-import arc.scene.utils.Elem;
-import arc.struct.Seq;
-import arc.util.Nullable;
-import arc.util.Scaling;
-import mindustry.Vars;
-import mindustry.gen.Icon;
-import mindustry.gen.Tex;
-import mindustry.graphics.Pal;
-import mindustry.type.ItemStack;
-import mindustry.type.LiquidStack;
-import mindustry.ui.Styles;
-import multicraft.MultiCrafter.MultiCrafterBuild;
+import arc.scene.ui.*;
+import arc.scene.ui.layout.*;
+import arc.scene.utils.*;
+import arc.util.*;
+import mindustry.*;
+import mindustry.gen.*;
+import mindustry.graphics.*;
+import mindustry.type.*;
+import mindustry.ui.*;
+import multicraft.MultiCrafter.*;
 
-import java.util.HashMap;
+import java.util.*;
 
-public abstract class RecipeSelector {
-    public static HashMap<String, RecipeSelector> all = new HashMap<>();
+public abstract class RecipeSwitchStyle {
+    public static HashMap<String, RecipeSwitchStyle> all = new HashMap<>();
 
-    public static RecipeSelector get(@Nullable String name) {
-        if (name == null) return Transform;
-        RecipeSelector inMap = all.get(name.toLowerCase());
-        if (inMap == null) return Transform;
+    public static RecipeSwitchStyle get(@Nullable String name) {
+        if (name == null) return transform;
+        RecipeSwitchStyle inMap = all.get(name.toLowerCase());
+        if (inMap == null) return transform;
         else return inMap;
     }
 
-    public RecipeSelector(String name) {
+    public RecipeSwitchStyle(String name) {
         all.put(name.toLowerCase(), this);
     }
 
@@ -42,14 +36,15 @@ public abstract class RecipeSelector {
                 img.setColor(entry.iconColor);
             return img;
         }
-        Seq<ItemStack> items = entry.items;
-        Seq<LiquidStack> fluids = entry.fluids;
+        ItemStack[] items = entry.items;
+        LiquidStack[] fluids = entry.fluids;
         boolean outputPower = entry.power > 0f;
         boolean outputHeat = entry.heat > 0f;
-        if (items.size > 0) {
-            return new Image(items.get(0).item.uiIcon);
-        } else if (fluids.size > 0) {
-            return new Image(fluids.get(0).liquid.uiIcon);
+        PayloadStack[] paylods = entry.payloads;
+        if (items.length > 0) {
+            return new Image(items[0].item.uiIcon);
+        } else if (fluids.length > 0) {
+            return new Image(fluids[0].liquid.uiIcon);
         } else if (outputPower) {
             Image img = new Image(Icon.power.getRegion());
             img.setColor(Pal.power);
@@ -58,11 +53,13 @@ public abstract class RecipeSelector {
             Image img = new Image(Icon.waves.getRegion());
             img.setColor(b.heatColor);
             return img;
+        } else if (paylods.length > 0) {
+            return new Image(paylods[0].item.uiIcon);
         }
         return new Image(Icon.cancel.getRegion());
     }
 
-    public static RecipeSelector Simple = new RecipeSelector("simple") {
+    public static RecipeSwitchStyle simple = new RecipeSwitchStyle("simple") {
 
         @Override
         public void build(MultiCrafter b, MultiCrafterBuild c, Table table) {
@@ -84,7 +81,7 @@ public abstract class RecipeSelector {
                 button.replaceImage(img);
                 button.getImageCell().scaling(Scaling.fit).size(Vars.iconLarge);
                 button.changed(() -> c.configure(finalI));
-                button.update(() -> button.setChecked(c.curRecipeIndex == finalI));
+                button.update(() -> button.setChecked(c.recipeId == finalI));
                 t.add(button).grow().margin(10f);
                 if (i != 0 && i % 3 == 0) {
                     t.row();
@@ -94,7 +91,7 @@ public abstract class RecipeSelector {
         }
     };
 
-    public static RecipeSelector Number = new RecipeSelector("number") {
+    public static RecipeSwitchStyle number = new RecipeSwitchStyle("number") {
         @Override
         public void build(MultiCrafter b, MultiCrafterBuild c, Table table) {
             Table t = new Table();
@@ -102,10 +99,10 @@ public abstract class RecipeSelector {
                 Recipe recipe = b.resolvedRecipes.get(i);
                 int finalI = i;
                 TextButton button = Elem.newButton("" + i, Styles.togglet,
-                    () -> c.configure(finalI));
+                        () -> c.configure(finalI));
                 if (recipe.iconColor != null)
                     button.setColor(recipe.iconColor);
-                button.update(() -> button.setChecked(c.curRecipeIndex == finalI));
+                button.update(() -> button.setChecked(c.recipeId == finalI));
                 t.add(button).size(50f);
                 if (i != 0 && i % 3 == 0) {
                     t.row();
@@ -114,7 +111,7 @@ public abstract class RecipeSelector {
             table.add(t).grow();
         }
     };
-    public static RecipeSelector Transform = new RecipeSelector("transform") {
+    public static RecipeSwitchStyle transform = new RecipeSwitchStyle("transform") {
         @Override
         public void build(MultiCrafter b, MultiCrafterBuild c, Table table) {
             Table t = new Table();
@@ -133,14 +130,14 @@ public abstract class RecipeSelector {
                 bt.add(out).pad(6f);
                 button.replaceImage(bt);
                 button.changed(() -> c.configure(finalI));
-                button.update(() -> button.setChecked(c.curRecipeIndex == finalI));
+                button.update(() -> button.setChecked(c.recipeId == finalI));
                 t.add(button).grow().pad(8f).margin(10f);
             }
             table.add(t).grow();
         }
     };
 
-    public static RecipeSelector Detailed = new RecipeSelector("detailed") {
+    public static RecipeSwitchStyle detailed = new RecipeSwitchStyle("detailed") {
 
         @Override
         public void build(MultiCrafter b, MultiCrafterBuild c, Table table) {
@@ -155,7 +152,7 @@ public abstract class RecipeSelector {
                 int finalI = i;
                 ImageButton button = new ImageButton(Styles.clearTogglei);
                 button.changed(() -> c.configure(finalI));
-                button.update(() -> button.setChecked(c.curRecipeIndex == finalI));
+                button.update(() -> button.setChecked(c.recipeId == finalI));
                 button.replaceImage(t);
                 table.add(button).pad(5f).margin(10f).grow();
                 table.row();

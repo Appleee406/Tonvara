@@ -40,6 +40,7 @@ public class TO_Planets {
 
             ruleSetter = r -> {
               r.waveTeam = Team.neoplastic;
+              // r.defaultTeam = Team.green;
               r.fog = false;
               r.placeRangeCheck = false;
               r.showSpawns = true;

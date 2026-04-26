@@ -52,6 +52,7 @@ public class TO_ConduitBlocks {
             researchCost =  with(TO_Items.wood, 150, TO_Items.stone, 100);
 
             liquidCapacity = 370f;
+            liquidPadding = 6f/4f;
             size = 2;
             solid = true;
         }};

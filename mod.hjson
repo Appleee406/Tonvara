@@ -4,7 +4,7 @@ description: "Your aim is to colonize this teeming life planet"
 author: "[scarlet[]]appleee[[]]"
 
 version: 0.0
-minGameVersion: 157.3
+minGameVersion: 157.4
 
 main: "Tonvara.Tonvara"
 java: true
